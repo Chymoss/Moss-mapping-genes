@@ -1,7 +1,7 @@
 ---
 title: "BSA-v2"
 author: "Deng Zhaoguo"
-format: html
+format: ipynb
 self-contained: true
 date: "`r Sys.Date()`"
 toc: true       
@@ -176,6 +176,4 @@ dev.off()
 
 ```
 
-GTRD的示例图
-
-![](gtrD-LOD_all_chromosomes.jpg)
+GTRD的示例图![](images/GTRD_3line_LOD_all_chromosomes.jpg)
