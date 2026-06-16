@@ -1,3 +1,5 @@
 SAMPLE	READ1	READ2	SegregantNumbers
-mut-pool	/path/mut-pool_R1.fq.gz	/path/mut-pool_R2.fq.gz	48
-WT-pool	/path/WT-pool_R1.fq.gz	/path/WT-pool_R2.fq.gz	48
+A-mut-pool	/path/A-mut-pool_R1.fq.gz	/path/A-mut-pool_R2.fq.gz	48
+A-WT-pool	/path/A-WT-pool_R1.fq.gz	/path/A-WT-pool_R2.fq.gz	48
+B-mut-pool	/path/B-mut-pool_R1.fq.gz	/path/B-mut-pool_R2.fq.gz	36
+B-WT-pool	/path/B-WT-pool_R1.fq.gz	/path/B-WT-pool_R2.fq.gz	36

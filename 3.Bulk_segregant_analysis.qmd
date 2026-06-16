@@ -1,8 +1,7 @@
 ---
-title: "v4.1"
+title: "pub v2"
 author: "Deng Zhaoguo"
-jupyter: ir
-format: ipynb
+format: html
 self-contained: true
 date: "`r Sys.Date()`"
 toc: true       
@@ -13,20 +12,23 @@ execute:
   warning: FALSE
   message: FALSE
 ---
-# Read the data. Pay attention to the correspondence between mutant and wildtype samples, which are located in column 3 (mutant) and column 4 (wt) in this case, respectively.
+
+# Read the data.
+
+Pay attention to the correspondence between mutant and wildtype samples, which are located in column 6 (mutant) and column 7 (wt) in this case, respectively.
 
 ```{r}
 # Read allele depth file
-var_file = "GTRC-Combine.results_var_AD.table"
+var_file = "usr_sample.bialle.bcf.AD.txt"
 
-raw = read.delim(var_file, header = TRUE, colClasses = c("character", "numeric", "character","character"))
+raw = read.delim(var_file, header = FALSE, colClasses = c("character", "numeric", "character","character","numeric","character","character"))
 
 # remove positions with no reads in either pool
-raw <- raw[!is.na(raw[[3]]) & !is.na(raw[[4]]), ]
+raw <- raw[!is.na(raw[[6]]) & !is.na(raw[[7]]), ]
 
 # strsplit A,B \t X,Y to A B X Y
-wt_col=4
-mut_col=3
+wt_col=7
+mut_col=6
 
 wt_AD = matrix(as.numeric(unlist(strsplit(raw[, wt_col], ","))), ncol = 2, byrow = TRUE)
 mut_AD = matrix(as.numeric(unlist(strsplit(raw[, mut_col], ","))), ncol = 2, byrow = TRUE)
@@ -35,12 +37,12 @@ colnames(mut_AD) = colnames(wt_AD) = c("ref_reads", "alt_reads")
 TEMP = cbind(raw[, 1:2], mut_AD)
 merged_data = cbind(TEMP, wt_AD)
 
-colnames(merged_data) = c("CHROM", "POS", "ref_reads_mut", "alt_reads_mut","ref_reads_wt", "alt_reads_wt")
+colnames(merged_data) = c("CHROM", "POS","ref_reads_mut", "alt_reads_mut","ref_reads_wt", "alt_reads_wt")
 ```
 
-Example:
+Example: the columns of input var_file are " CHR, POS, REF, ALT, DP, AD (in mut pool), AD (in wt pool) "
 
-![](images/BSA-example.jpg)
+![](images/Snipaste_2026-06-16_15-35-10.jpg)
 
 # Calculate allele frequencies
 
@@ -87,91 +89,93 @@ smooth_LOD <- function(position, LOD, window_size = 1e6, step_size = 5e5) {
 ```
 
 # plot
+
 SNP ratio of WT-pool (blue) and mutant-pool (red); LOD (black)
 
 ```{r}
-# plot
+
+# plot + export
+
+outdir <- "plots"
+dir.create(outdir, showWarnings = FALSE)
 
 for (chr in unique(result_table$CHROM)) {
+  
   chr_data <- subset(result_table, CHROM == chr)
   
-
   smooth_data_mut <- smooth_LOD(chr_data$POS, chr_data$mut_freq)
   smooth_data_wt  <- smooth_LOD(chr_data$POS, chr_data$wt_freq)
   smooth_data_LOD <- smooth_LOD(chr_data$POS, chr_data$LOD)
   
-  # plot allele frequency（left y-axis）
+  ############################
+  # PDF (Illustrator editable)
+  ############################
+  pdf(file = file.path(outdir, paste0("Chr_", chr, ".pdf")),
+      width = 8, height = 4.5)
+  
+  
   plot(chr_data$POS / 1e6, chr_data$mut_freq, type = "n",
        xlab = "Position (Mb)", ylab = "Allele frequency",
        main = paste("Chromosome", chr),
        ylim = c(0, 1))
   
-
   lines(smooth_data_mut$POS / 1e6, smooth_data_mut$LOD, col = "red",  lwd = 2)
   lines(smooth_data_wt$POS  / 1e6, smooth_data_wt$LOD,  col = "blue", lwd = 2)
   
-  # LOD (right y-axis)
   par(new = TRUE)
-  plot(chr_data$POS / 1e6, chr_data$LOD, type = "n", axes = FALSE, xlab = "", ylab = "", ylim = c(-2, 15))
-  lines(smooth_data_LOD$POS / 1e6, smooth_data_LOD$LOD, col = "black", lwd = 2)
+  
+  plot(chr_data$POS / 1e6, chr_data$LOD, type = "n",
+       axes = FALSE, xlab = "", ylab = "", ylim = c(-2, 15))
+  
+  lines(smooth_data_LOD$POS / 1e6, smooth_data_LOD$LOD,
+        col = "black", lwd = 2)
+  
   axis(side = 4, at = seq(0, 15, by = 3), labels = seq(0, 15, by = 3))
   mtext("LOD score", side = 4, line = 2.5)
   
-   # Threshold
   abline(h = 3, col = "black", lwd = 1.5, lty = 2)
-
-  legend("topleft", legend = c("Mut pool (red)", "WT pool (blue)", "LOD (black)"),
+  
+  legend("topleft",
+         legend = c("Mut pool (red)", "WT pool (blue)", "LOD (black)"),
          col = c("red", "blue", "black"), lwd = 2, bty = "n")
-}
-
-```
-
-## Combine on one image
-
-```{r}
-# combine for one image
-jpeg("LOD_all_chromosomes.jpg", width = 2100*2, height = 2970*2, res = 300)  # A4, 300 dpi
   
-  # set 6 × 5
-  par(mfrow = c(6, 5),
-    mar = c(4, 4, 3, 4.5),  
-    oma = c(1, 1, 1, 1))      
+  dev.off()
   
-for (chr in unique(result_table$CHROM)) {
-  chr_data <- subset(result_table, CHROM == chr)
+  ############################
+  # TIFF (publication)
+  ############################
+  
+  tiff(file = file.path(outdir, paste0("Chr_", chr, ".tiff")),
+       width = 2000, height = 1200, res = 300, compression = "lzw")
   
 
-  smooth_data_mut <- smooth_LOD(chr_data$POS, chr_data$mut_freq)
-  smooth_data_wt  <- smooth_LOD(chr_data$POS, chr_data$wt_freq)
-  smooth_data_LOD <- smooth_LOD(chr_data$POS, chr_data$LOD)
   
-
   plot(chr_data$POS / 1e6, chr_data$mut_freq, type = "n",
        xlab = "Position (Mb)", ylab = "Allele frequency",
        main = paste("Chromosome", chr),
        ylim = c(0, 1))
-
-
+  
   lines(smooth_data_mut$POS / 1e6, smooth_data_mut$LOD, col = "red",  lwd = 2)
   lines(smooth_data_wt$POS  / 1e6, smooth_data_wt$LOD,  col = "blue", lwd = 2)
   
-
   par(new = TRUE)
-  plot(chr_data$POS / 1e6, chr_data$LOD, type = "n", axes = FALSE, xlab = "", ylab = "", ylim = c(-2, 15))
-  lines(smooth_data_LOD$POS / 1e6, smooth_data_LOD$LOD, col = "black", lwd = 2)
+  
+  plot(chr_data$POS / 1e6, chr_data$LOD, type = "n",
+       axes = FALSE, xlab = "", ylab = "", ylim = c(-2, 15))
+  
+  lines(smooth_data_LOD$POS / 1e6, smooth_data_LOD$LOD,
+        col = "black", lwd = 2)
+  
   axis(side = 4, at = seq(0, 15, by = 3), labels = seq(0, 15, by = 3))
   mtext("LOD score", side = 4, line = 2.5)
   
-
   abline(h = 3, col = "black", lwd = 1.5, lty = 2)
   
-
-  legend("topleft", legend = c("Mut pool (red)", "WT pool (blue)", "LOD (black)"),
+  legend("topleft",
+         legend = c("Mut pool (red)", "WT pool (blue)", "LOD (black)"),
          col = c("red", "blue", "black"), lwd = 2, bty = "n")
-}
   
-dev.off()
+  dev.off()
+}
 
 ```
-
-
