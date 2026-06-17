@@ -3,7 +3,7 @@
 <html lang="en">
 <head><meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>2.PoolSeq</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>2.Pool_sequencing_of_population</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <style type="text/css">
     pre { line-height: 125%; }
 td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
@@ -7802,7 +7802,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>pub v2</p>
+<p>pub v1 based on version 5.4</p>
 </div>
 </div>
 </div>
@@ -7891,7 +7891,7 @@ dos2unix<span class="w"> </span><span class="nv">$SampleInfo</span>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=672a36da-ae71-454f-941d-5516485ad3d2">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=c669f7c7-1ce4-4aae-b382-8ce8f7363187">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7922,7 +7922,8 @@ mkdir<span class="w"> </span>-p<span class="w"> </span><span class="se">\</span>
 <span class="nv">$OUTDIR</span>/report<span class="w"> </span><span class="se">\</span>
 <span class="nv">$OUTDIR</span>/1.mapping<span class="w"> </span><span class="se">\</span>
 <span class="nv">$OUTDIR</span>/2.variants<span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/3.output
+<span class="nv">$OUTDIR</span>/3.output<span class="w"> </span><span class="se">\</span>
+<span class="nv">$OUTDIR</span>/4.result
 
 <span class="c1">############################</span>
 <span class="c1"># Logging</span>
@@ -7933,12 +7934,40 @@ log<span class="o">(){</span>
 <span class="o">}</span>
 
 log<span class="w"> </span><span class="s2">"Start sample </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
+
+<span class="c1">############################</span>
+<span class="c1"># Genome size</span>
+<span class="c1">############################</span>
+
+<span class="nv">GENOME_SIZE</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">"&gt;"</span><span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-c<span class="k">)</span>
+
+<span class="c1">############################</span>
+<span class="c1"># Depth estimation (sampling)</span>
+<span class="c1">############################</span>
+
+estimate_depth<span class="o">(){</span>
+
+<span class="nv">sample</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">read1</span><span class="o">=</span><span class="nv">$2</span>
+<span class="nv">resultvar</span><span class="o">=</span><span class="nv">$3</span>
+
+<span class="nv">NUM_READS</span><span class="o">=</span><span class="k">$(</span>zcat<span class="w"> </span><span class="nv">$read1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-n<span class="w"> </span><span class="m">4000000</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="k">)</span>
+<span class="nv">NUM_READS</span><span class="o">=</span><span class="k">$((</span><span class="nv">NUM_READS</span><span class="o">/</span><span class="m">4</span><span class="k">))</span>
+
+<span class="nv">DEPTH</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">"</span><span class="nv">$NUM_READS</span><span class="s2"> * 150 * 2 / </span><span class="nv">$GENOME_SIZE</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>bc<span class="k">)</span>
+
+<span class="nb">eval</span><span class="w"> </span><span class="nv">$resultvar</span><span class="o">=</span><span class="nv">$DEPTH</span>
+
+<span class="o">}</span>
+
+estimate_depth<span class="w"> </span><span class="nv">$SAMPLE_MUT</span><span class="w"> </span><span class="nv">$READ1_MUT</span><span class="w"> </span>DEPTH_MUT
+estimate_depth<span class="w"> </span><span class="nv">$SAMPLE_WT</span><span class="w"> </span><span class="nv">$READ1_WT</span><span class="w"> </span>DEPTH_WT
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=18b62409-a507-450d-9747-6aae6f28b92f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=5a966483-bc6a-4542-a9e5-e93c162a46ab">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -7961,7 +7990,7 @@ fastqc<span class="w"> </span>-o<span class="w"> </span><span class="nv">$OUTDIR
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=06d9aaab-6406-44a8-8e08-c6abe5b93bf9">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=176cdd08-ea34-46e6-9c97-fdbfa8a656ad">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8005,7 +8034,7 @@ map_sample<span class="w"> </span><span class="nv">$SAMPLE_WT</span><span class=
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b38aa8af-8700-4615-a0f6-d98d9ff01cf8">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3bd79e6e-d733-49fd-94b4-d0fdb4b97ff8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8014,33 +8043,36 @@ map_sample<span class="w"> </span><span class="nv">$SAMPLE_WT</span><span class=
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
-<span class="c1"># mpileup</span>
+<span class="c1"># HaplotypeCaller</span>
 <span class="c1">############################</span>
-log<span class="w"> </span><span class="s2">"mpileup </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
 
-bcftools<span class="w"> </span>mpileup<span class="w"> </span><span class="se">\</span>
--q<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
--Q<span class="w"> </span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
--f<span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="se">\</span>
--R<span class="w"> </span><span class="nv">$SNP_SITES</span><span class="w"> </span><span class="se">\</span>
--a<span class="w"> </span>FORMAT/AD,FORMAT/DP<span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/1.mapping/<span class="si">${</span><span class="nv">SAMPLE_MUT</span><span class="si">}</span>.dedup.bam<span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/1.mapping/<span class="si">${</span><span class="nv">SAMPLE_WT</span><span class="si">}</span>.dedup.bam<span class="w"> </span><span class="se">\</span>
--Ou<span class="w"> </span><span class="p">|</span>
-bcftools<span class="w"> </span>call<span class="w"> </span><span class="se">\</span>
--m<span class="w"> </span><span class="se">\</span>
--A<span class="w"> </span><span class="se">\</span>
--Oz<span class="w"> </span><span class="se">\</span>
--o<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bcf.vcf.gz
+log<span class="w"> </span><span class="s2">"HaplotypeCaller GVCF </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
 
-tabix<span class="w"> </span>-p<span class="w"> </span>vcf<span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bcf.vcf.gz
+call_gvcf<span class="o">(){</span>
+
+<span class="nv">sample</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">ploidy</span><span class="o">=</span><span class="nv">$2</span>
+
+gatk<span class="w"> </span>HaplotypeCaller<span class="w"> </span><span class="se">\</span>
+-R<span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="se">\</span>
+-I<span class="w"> </span><span class="nv">$OUTDIR</span>/1.mapping/<span class="nv">$sample</span>.dedup.bam<span class="w"> </span><span class="se">\</span>
+--intervals<span class="w"> </span><span class="nv">$SNP_SITES</span><span class="w"> </span><span class="se">\</span>
+--sample-ploidy<span class="w"> </span><span class="nv">$ploidy</span><span class="w"> </span><span class="se">\</span>
+-ERC<span class="w"> </span>GVCF<span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="nv">$sample</span>.g.vcf.gz
+
+<span class="o">}</span>
+
+call_gvcf<span class="w"> </span><span class="nv">$SAMPLE_MUT</span><span class="w"> </span><span class="nv">$PLOIDY_MUT</span><span class="w"> </span><span class="p">&amp;</span>
+call_gvcf<span class="w"> </span><span class="nv">$SAMPLE_WT</span><span class="w"> </span><span class="nv">$PLOIDY_WT</span><span class="w"> </span><span class="p">&amp;</span>
+
+<span class="nb">wait</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=4b900594-aebc-40df-b261-35d8f9df5946">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=0a4a5bc4-44fc-415d-8a29-158748435832">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8049,14 +8081,113 @@ tabix<span class="w"> </span>-p<span class="w"> </span>vcf<span class="w"> </spa
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
-<span class="c1"># filter biallelic for downstream analysis</span>
+<span class="c1"># Merge GVCF</span>
 <span class="c1">############################</span>
 
-bcftools<span class="w"> </span>view<span class="w"> </span>-m2<span class="w"> </span>-M2<span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bcf.vcf.gz<span class="w"> </span><span class="p">|</span>
-bcftools<span class="w"> </span>sort<span class="w"> </span>-Oz<span class="w"> </span>-o<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bialle.bcf.vcf.gz
+log<span class="w"> </span><span class="s2">"Combine GVCF </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
 
-tabix<span class="w"> </span>-p<span class="w"> </span>vcf<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bialle.bcf.vcf.gz
+gatk<span class="w"> </span>CombineGVCFs<span class="w"> </span><span class="se">\</span>
+-R<span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="se">\</span>
+--variant<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="nv">$SAMPLE_MUT</span>.g.vcf.gz<span class="w"> </span><span class="se">\</span>
+--variant<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="nv">$SAMPLE_WT</span>.g.vcf.gz<span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="nv">$BASE_SAMPLE</span>.Combine.g.vcf.gz
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=d0cb51c2-2509-4d40-968b-2605757b10c1">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
+<span class="c1"># Chromosome list</span>
+<span class="c1">############################</span>
+log<span class="w"> </span><span class="s2">"Genotype </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
+
+grep<span class="w"> </span><span class="s2">"&gt;"</span><span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">'s/&gt;//'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d<span class="w"> </span><span class="s1">' '</span><span class="w"> </span>-f1<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$OUTDIR</span>/chr.list
+
+<span class="c1">############################</span>
+<span class="c1"># Parallel Genotype</span>
+<span class="c1">############################</span>
+
+<span class="nv">MAX_JOBS</span><span class="o">=</span><span class="m">8</span>
+
+<span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>CHR
+<span class="k">do</span>
+
+gatk<span class="w"> </span>--java-options<span class="w"> </span><span class="s2">"-Xmx4G"</span><span class="w"> </span>GenotypeGVCFs<span class="w"> </span><span class="se">\</span>
+-R<span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="se">\</span>
+-V<span class="w"> </span><span class="nv">$OUTDIR</span>/2.variants/<span class="nv">$BASE_SAMPLE</span>.Combine.g.vcf.gz<span class="w"> </span><span class="se">\</span>
+-L<span class="w"> </span><span class="nv">$CHR</span><span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/3.output/<span class="nv">$BASE_SAMPLE</span>.Combine.<span class="nv">$CHR</span>.vcf.gz<span class="w"> </span><span class="p">&amp;</span>
+
+<span class="k">while</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="k">$(</span><span class="nb">jobs</span><span class="w"> </span>-r<span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="k">)</span><span class="w"> </span>-ge<span class="w"> </span><span class="nv">$MAX_JOBS</span><span class="w"> </span><span class="o">]</span>
+<span class="k">do</span>
+sleep<span class="w"> </span><span class="m">2</span>
+<span class="k">done</span>
+
+<span class="k">done</span><span class="w"> </span>&lt;<span class="w"> </span><span class="nv">$OUTDIR</span>/chr.list
+
+<span class="nb">wait</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=45dd6b3a-f741-4d79-b5c4-5629f9420cee">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
+<span class="c1"># Merge VCF</span>
+<span class="c1">############################</span>
+
+log<span class="w"> </span><span class="s2">"Merge VCF </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
+
+gatk<span class="w"> </span>MergeVcfs<span class="w"> </span><span class="se">\</span>
+<span class="k">$(for</span><span class="w"> </span>f<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$OUTDIR</span>/3.output/*.vcf.gz<span class="p">;</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">"-I </span><span class="nv">$f</span><span class="s2">"</span><span class="p">;</span><span class="w"> </span><span class="k">done)</span><span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.vcf.gz
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8472b749-fc98-4a96-98f8-e4235d4c1296">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
+<span class="c1"># Filtering</span>
+<span class="c1">############################</span>
+
+gatk<span class="w"> </span>VariantFiltration<span class="w"> </span><span class="se">\</span>
+-R<span class="w"> </span><span class="nv">$REF_FASTA</span><span class="w"> </span><span class="se">\</span>
+-V<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.vcf.gz<span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.filter.vcf.gz<span class="w"> </span><span class="se">\</span>
+-filter-name<span class="w"> </span><span class="s2">"hard_filter"</span><span class="w"> </span><span class="se">\</span>
+-filter<span class="w"> </span><span class="s2">"QD &lt; 2.0 || SOR &gt; 3.0 || FS &gt; 60.0 || MQ &lt; 40.0"</span>
+
+gatk<span class="w"> </span>SelectVariants<span class="w"> </span>--exclude-filtered<span class="w"> </span>--select-type-to-include<span class="w"> </span>SNP<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--restrict-alleles-to<span class="w"> </span>BIALLELIC<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-select<span class="w"> </span><span class="s2">"vc.getGenotype('</span><span class="nv">$SAMPLE_MUT</span><span class="s2">').getDP() &gt; 0.3 * </span><span class="nv">$DEPTH_MUT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-select<span class="w"> </span><span class="s2">"vc.getGenotype('</span><span class="nv">$SAMPLE_MUT</span><span class="s2">').getDP() &lt; 3 * </span><span class="nv">$DEPTH_MUT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-select<span class="w"> </span><span class="s2">"vc.getGenotype('</span><span class="nv">$SAMPLE_WT</span><span class="s2">').getDP() &gt; 0.3 * </span><span class="nv">$DEPTH_WT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-select<span class="w"> </span><span class="s2">"vc.getGenotype('</span><span class="nv">$SAMPLE_WT</span><span class="s2">').getDP() &lt; 3 * </span><span class="nv">$DEPTH_WT</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-V<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.filter.vcf.gz<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-O<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.snp.cleaned.vcf.gz
 </pre></div>
 </div>
 </div>
@@ -8071,16 +8202,15 @@ tabix<span class="w"> </span>-p<span class="w"> </span>vcf<span class="w"> </spa
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-bash"><pre><span></span><span class="c1">############################</span>
-<span class="c1"># extract AD</span>
+<span class="c1"># Export allele depth</span>
 <span class="c1">############################</span>
 
-bcftools<span class="w"> </span>query<span class="w"> </span><span class="se">\</span>
--f<span class="w"> </span><span class="s1">'%CHROM\t%POS\t%REF\t%ALT\t%DP[\t%AD]\n'</span><span class="w"> </span><span class="se">\</span>
-<span class="nv">$OUTDIR</span>/2.variants/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bialle.bcf.vcf.gz<span class="w"> </span><span class="se">\</span>
-&gt;<span class="w"> </span><span class="nv">$OUTDIR</span>/3.output/<span class="si">${</span><span class="nv">BASE_SAMPLE</span><span class="si">}</span>.bialle.bcf.AD.txt
+gatk<span class="w"> </span>VariantsToTable<span class="w"> </span><span class="se">\</span>
+-V<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.snp.cleaned.vcf.gz<span class="w"> </span><span class="se">\</span>
+-F<span class="w"> </span>CHROM<span class="w"> </span>-F<span class="w"> </span>POS<span class="w"> </span>-GF<span class="w"> </span>AD<span class="w"> </span><span class="se">\</span>
+-O<span class="w"> </span><span class="nv">$OUTDIR</span>/4.result/<span class="nv">$BASE_SAMPLE</span>.Combine.results_var_AD.table
 
-
-log<span class="w"> </span><span class="s2">"finish </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
+log<span class="w"> </span><span class="s2">"Finished </span><span class="nv">$BASE_SAMPLE</span><span class="s2">"</span>
 </pre></div>
 </div>
 </div>

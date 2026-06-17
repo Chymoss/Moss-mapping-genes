@@ -1,5 +1,5 @@
 ---
-title: "pub v2"
+title: "pub v2 based on v4.2"
 author: "Deng Zhaoguo"
 format: html
 self-contained: true
@@ -15,20 +15,20 @@ execute:
 
 # Read the data.
 
-Pay attention to the correspondence between mutant and wildtype samples, which are located in column 6 (mutant) and column 7 (wt) in this case, respectively.
+Pay attention to the correspondence between mutant and wildtype samples, which are located in column 3 (mutant) and column 4 (wt) in this case, respectively.
 
 ```{r}
 # Read allele depth file
-var_file = "usr_sample.bialle.bcf.AD.txt"
+var_file = "usr_sample.AD.table"
 
-raw = read.delim(var_file, header = FALSE, colClasses = c("character", "numeric", "character","character","numeric","character","character"))
+raw = read.delim(var_file, header = TRUE, colClasses = c("character", "numeric","character","character"))
 
 # remove positions with no reads in either pool
-raw <- raw[!is.na(raw[[6]]) & !is.na(raw[[7]]), ]
+raw <- raw[!is.na(raw[[3]]) & !is.na(raw[[4]]), ]
 
 # strsplit A,B \t X,Y to A B X Y
-wt_col=7
-mut_col=6
+wt_col=4
+mut_col=3
 
 wt_AD = matrix(as.numeric(unlist(strsplit(raw[, wt_col], ","))), ncol = 2, byrow = TRUE)
 mut_AD = matrix(as.numeric(unlist(strsplit(raw[, mut_col], ","))), ncol = 2, byrow = TRUE)
@@ -40,9 +40,9 @@ merged_data = cbind(TEMP, wt_AD)
 colnames(merged_data) = c("CHROM", "POS","ref_reads_mut", "alt_reads_mut","ref_reads_wt", "alt_reads_wt")
 ```
 
-Example: the columns of input var_file are " CHR, POS, REF, ALT, DP, AD (in mut pool), AD (in wt pool) "
+Example: the columns of input var_file are " CHR, POS, AD (in mut pool), AD (in wt pool) "
 
-![](images/Snipaste_2026-06-16_15-35-10.jpg)
+# ![](images/Snipaste_2026-06-17_08-23-39-01.jpg)
 
 # Calculate allele frequencies
 
